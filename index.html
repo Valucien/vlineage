@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İyidilli – Öztek Soy Ağacı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Spectral:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#070a14; --bg1:#0d1326; --bg2:#121a33;
+    --line:rgba(180,200,255,.20);
+    --bus:rgba(210,220,255,.34);
+    --joint:rgba(220,228,255,.7);
+    --male-bg:rgba(56,118,224,.16); --male-bd:rgba(126,176,255,.60); --male-ac:#7fb0ff;
+    --fem-bg:rgba(230,82,150,.15);  --fem-bd:rgba(255,150,200,.58); --fem-ac:#ff9ec6;
+    --ego-bg:rgba(150,82,236,.22);  --ego-bd:rgba(206,160,255,.85); --ego-ac:#caa0ff;
+    --ink:#f4f6ff; --muted:rgba(228,232,255,.62);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg0);}
+  body{
+    font-family:'Spectral',Georgia,serif; color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 22% -8%, rgba(232,82,150,.10), transparent 60%),
+      radial-gradient(1200px 700px at 80% -6%, rgba(56,118,224,.12), transparent 60%),
+      radial-gradient(900px 600px at 50% 115%, rgba(150,82,236,.14), transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg0) 70%);
+    background-attachment:fixed;
+  }
+  /* subtle grain */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.05;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .scene{ position:relative; width:5456px; height:1538px; margin:0 auto; }
+
+  /* header */
+  .masthead{ position:absolute; top:46px; left:0; right:0; text-align:center; z-index:5; }
+  .crest{ font-size:13px; letter-spacing:.5em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .title{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:62px; line-height:1;
+           letter-spacing:.01em; background:linear-gradient(90deg,var(--fem-ac),#fff 45%,var(--male-ac));
+           -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:22px; color:var(--muted); margin-top:8px; }
+  .legend{ display:flex; gap:26px; justify-content:center; margin-top:18px; font-size:13px; color:var(--muted); letter-spacing:.04em; }
+  .legend span{ display:inline-flex; align-items:center; gap:8px; }
+  .dot{ width:11px; height:11px; border-radius:50%; box-shadow:0 0 10px currentColor; }
+  .dot.m{ background:var(--male-ac); color:var(--male-ac); }
+  .dot.f{ background:var(--fem-ac); color:var(--fem-ac); }
+  .dot.e{ background:var(--ego-ac); color:var(--ego-ac); }
+  .sides{ position:absolute; top:188px; width:100%; display:flex; justify-content:space-between;
+           padding:0 60px; z-index:5; font-family:'Cormorant Garamond',serif; font-style:italic;
+           font-size:26px; color:rgba(255,255,255,.34); }
+
+  .wires{ position:absolute; inset:0; z-index:1; }
+  .wires line{ stroke:var(--line); stroke-width:1.4; }
+  .wires line.bus{ stroke:var(--bus); stroke-width:1.6; }
+  .wires .joint{ fill:var(--joint); }
+
+  .rail{ position:absolute; inset:0; z-index:0; }
+  .rail line.band{ stroke:rgba(195,208,255,.085); stroke-width:1; stroke-dasharray:2 8; }
+  .rail line.spine{ stroke:rgba(212,222,255,.30); stroke-width:1.2; stroke-dasharray:3 6; }
+  .rail line.tick{ stroke:rgba(212,222,255,.5); stroke-width:1.5; }
+  .genlab{ position:absolute; left:0; width:111px; text-align:right; padding-right:8px;
+            z-index:2; font-family:'Cormorant Garamond',serif; color:rgba(236,240,255,.6); line-height:.95; }
+  .genlab .gn{ font-size:34px; font-weight:600; display:block; }
+  .genlab .gk{ font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:rgba(236,240,255,.42); }
+  .genlab .me{ display:block; margin-top:3px; font-style:italic; font-size:13px; color:var(--ego-ac); }
+
+  .box{
+    position:absolute; width:188px; min-height:112px; z-index:3;
+    padding:11px 14px 12px; border-radius:15px; border:1px solid var(--male-bd);
+    background:var(--male-bg); backdrop-filter:blur(7px) saturate(120%);
+    -webkit-backdrop-filter:blur(7px) saturate(120%);
+    box-shadow:0 8px 26px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.07);
+    overflow:hidden; animation:rise .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .box::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; }
+  .box .role{ font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+  .box .name{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:19px; line-height:1.05; color:var(--ink); }
+  .box .dates{ font-size:12px; color:rgba(244,246,255,.9); margin-top:5px; font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+  .box .place{ font-size:11px; color:var(--muted); margin-top:3px; line-height:1.25; }
+
+  .box.male{ border-color:var(--male-bd); background:var(--male-bg); }
+  .box.male::before{ background:linear-gradient(var(--male-ac),transparent); }
+  .box.female{ border-color:var(--fem-bd); background:var(--fem-bg); }
+  .box.female::before{ background:linear-gradient(var(--fem-ac),transparent); }
+  .box.ego{
+    border-color:var(--ego-bd); background:var(--ego-bg);
+    box-shadow:0 0 0 1px var(--ego-bd), 0 0 34px rgba(170,110,255,.45), 0 10px 30px rgba(0,0,0,.5);
+  }
+  .box.ego::before{ background:linear-gradient(var(--ego-ac),transparent); width:5px; }
+  .box.ego .name{ font-size:22px; }
+  .box.ego .role{ color:var(--ego-ac); }
+
+  @keyframes rise{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  .foot{ position:absolute; bottom:26px; left:0; right:0; text-align:center;
+          font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:rgba(255,255,255,.3); z-index:5; }
+</style>
+</head>
+<body>
+  <div class="scene">
+    <div class="masthead">
+      <div class="crest">Soy Ağacı · Şecere</div>
+      <div class="title">İyidilli — Öztek</div>
+      <div class="subtitle">Alp Utku İyidilli · 6 kuşaklık nesep</div>
+      <div class="legend">
+        <span><i class="dot f"></i> Kadın · Anne tarafı</span>
+        <span><i class="dot m"></i> Erkek · Baba tarafı</span>
+        <span><i class="dot e"></i> Ben</span>
+      </div>
+    </div>
+    <div class="sides"><div>← Anne tarafı</div><div>Baba tarafı →</div></div>
+    <svg class="rail" width="5456" height="1538" viewBox="0 0 5456 1538">
+<line class="band" x1="26.0" y1="1274.0" x2="5430.0" y2="1274.0"/>
+<line class="band" x1="26.0" y1="1098.0" x2="5430.0" y2="1098.0"/>
+<line class="band" x1="26.0" y1="922.0" x2="5430.0" y2="922.0"/>
+<line class="band" x1="26.0" y1="746.0" x2="5430.0" y2="746.0"/>
+<line class="band" x1="26.0" y1="570.0" x2="5430.0" y2="570.0"/>
+<line class="band" x1="26.0" y1="394.0" x2="5430.0" y2="394.0"/>
+<line class="band" x1="26.0" y1="218.0" x2="5430.0" y2="218.0"/>
+<line class="band" x1="26.0" y1="1450.0" x2="5430.0" y2="1450.0"/>
+<line class="spine" x1="124" y1="218.0" x2="124" y2="1450.0"/>
+<line class="tick" x1="111" y1="1362.0" x2="137" y2="1362.0"/>
+<line class="tick" x1="111" y1="1186.0" x2="137" y2="1186.0"/>
+<line class="tick" x1="111" y1="1010.0" x2="137" y2="1010.0"/>
+<line class="tick" x1="111" y1="834.0" x2="137" y2="834.0"/>
+<line class="tick" x1="111" y1="658.0" x2="137" y2="658.0"/>
+<line class="tick" x1="111" y1="482.0" x2="137" y2="482.0"/>
+<line class="tick" x1="111" y1="306.0" x2="137" y2="306.0"/>
+</svg>
+    <svg class="wires" width="5456" height="1538" viewBox="0 0 5456 1538">
+<line x1="269.0" y1="538.0" x2="269.0" y2="570.0"/>
+<line x1="491.0" y1="538.0" x2="491.0" y2="570.0"/>
+<line class="bus" x1="269.0" y1="570.0" x2="491.0" y2="570.0"/>
+<line x1="380.0" y1="570.0" x2="380.0" y2="602.0"/>
+<circle class="joint" cx="380.0" cy="570.0" r="3.2"/>
+<line x1="713.0" y1="538.0" x2="713.0" y2="570.0"/>
+<line x1="935.0" y1="538.0" x2="935.0" y2="570.0"/>
+<line class="bus" x1="713.0" y1="570.0" x2="935.0" y2="570.0"/>
+<line x1="824.0" y1="570.0" x2="824.0" y2="602.0"/>
+<circle class="joint" cx="824.0" cy="570.0" r="3.2"/>
+<line x1="380.0" y1="714.0" x2="380.0" y2="746.0"/>
+<line x1="824.0" y1="714.0" x2="824.0" y2="746.0"/>
+<line class="bus" x1="380.0" y1="746.0" x2="824.0" y2="746.0"/>
+<line x1="602.0" y1="746.0" x2="602.0" y2="778.0"/>
+<circle class="joint" cx="602.0" cy="746.0" r="3.2"/>
+<line x1="1157.0" y1="538.0" x2="1157.0" y2="570.0"/>
+<line x1="1379.0" y1="538.0" x2="1379.0" y2="570.0"/>
+<line class="bus" x1="1157.0" y1="570.0" x2="1379.0" y2="570.0"/>
+<line x1="1268.0" y1="570.0" x2="1268.0" y2="602.0"/>
+<circle class="joint" cx="1268.0" cy="570.0" r="3.2"/>
+<line x1="1601.0" y1="362.0" x2="1601.0" y2="394.0"/>
+<line x1="1823.0" y1="362.0" x2="1823.0" y2="394.0"/>
+<line class="bus" x1="1601.0" y1="394.0" x2="1823.0" y2="394.0"/>
+<line x1="1712.0" y1="394.0" x2="1712.0" y2="426.0"/>
+<circle class="joint" cx="1712.0" cy="394.0" r="3.2"/>
+<line x1="2045.0" y1="362.0" x2="2045.0" y2="394.0"/>
+<line x1="2267.0" y1="362.0" x2="2267.0" y2="394.0"/>
+<line class="bus" x1="2045.0" y1="394.0" x2="2267.0" y2="394.0"/>
+<line x1="2156.0" y1="394.0" x2="2156.0" y2="426.0"/>
+<circle class="joint" cx="2156.0" cy="394.0" r="3.2"/>
+<line x1="1712.0" y1="538.0" x2="1712.0" y2="570.0"/>
+<line x1="2156.0" y1="538.0" x2="2156.0" y2="570.0"/>
+<line class="bus" x1="1712.0" y1="570.0" x2="2156.0" y2="570.0"/>
+<line x1="1934.0" y1="570.0" x2="1934.0" y2="602.0"/>
+<circle class="joint" cx="1934.0" cy="570.0" r="3.2"/>
+<line x1="1268.0" y1="714.0" x2="1268.0" y2="746.0"/>
+<line x1="1934.0" y1="714.0" x2="1934.0" y2="746.0"/>
+<line class="bus" x1="1268.0" y1="746.0" x2="1934.0" y2="746.0"/>
+<line x1="1601.0" y1="746.0" x2="1601.0" y2="778.0"/>
+<circle class="joint" cx="1601.0" cy="746.0" r="3.2"/>
+<line x1="602.0" y1="890.0" x2="602.0" y2="922.0"/>
+<line x1="1601.0" y1="890.0" x2="1601.0" y2="922.0"/>
+<line class="bus" x1="602.0" y1="922.0" x2="1601.0" y2="922.0"/>
+<line x1="1101.5" y1="922.0" x2="1101.5" y2="954.0"/>
+<circle class="joint" cx="1101.5" cy="922.0" r="3.2"/>
+<line x1="2489.0" y1="538.0" x2="2489.0" y2="570.0"/>
+<line x1="2711.0" y1="538.0" x2="2711.0" y2="570.0"/>
+<line class="bus" x1="2489.0" y1="570.0" x2="2711.0" y2="570.0"/>
+<line x1="2600.0" y1="570.0" x2="2600.0" y2="602.0"/>
+<circle class="joint" cx="2600.0" cy="570.0" r="3.2"/>
+<line x1="2600.0" y1="714.0" x2="2600.0" y2="746.0"/>
+<line x1="2933.0" y1="714.0" x2="2933.0" y2="746.0"/>
+<line class="bus" x1="2600.0" y1="746.0" x2="2933.0" y2="746.0"/>
+<line x1="2766.5" y1="746.0" x2="2766.5" y2="778.0"/>
+<circle class="joint" cx="2766.5" cy="746.0" r="3.2"/>
+<line x1="3155.0" y1="714.0" x2="3155.0" y2="746.0"/>
+<line x1="3377.0" y1="714.0" x2="3377.0" y2="746.0"/>
+<line class="bus" x1="3155.0" y1="746.0" x2="3377.0" y2="746.0"/>
+<line x1="3266.0" y1="746.0" x2="3266.0" y2="778.0"/>
+<circle class="joint" cx="3266.0" cy="746.0" r="3.2"/>
+<line x1="2766.5" y1="890.0" x2="2766.5" y2="922.0"/>
+<line x1="3266.0" y1="890.0" x2="3266.0" y2="922.0"/>
+<line class="bus" x1="2766.5" y1="922.0" x2="3266.0" y2="922.0"/>
+<line x1="3016.2" y1="922.0" x2="3016.2" y2="954.0"/>
+<circle class="joint" cx="3016.2" cy="922.0" r="3.2"/>
+<line x1="1101.5" y1="1066.0" x2="1101.5" y2="1098.0"/>
+<line x1="3016.2" y1="1066.0" x2="3016.2" y2="1098.0"/>
+<line class="bus" x1="1101.5" y1="1098.0" x2="3016.2" y2="1098.0"/>
+<line x1="2058.9" y1="1098.0" x2="2058.9" y2="1130.0"/>
+<circle class="joint" cx="2058.9" cy="1098.0" r="3.2"/>
+<line x1="3599.0" y1="714.0" x2="3599.0" y2="746.0"/>
+<line x1="3821.0" y1="714.0" x2="3821.0" y2="746.0"/>
+<line class="bus" x1="3599.0" y1="746.0" x2="3821.0" y2="746.0"/>
+<line x1="3710.0" y1="746.0" x2="3710.0" y2="778.0"/>
+<circle class="joint" cx="3710.0" cy="746.0" r="3.2"/>
+<line x1="4043.0" y1="714.0" x2="4043.0" y2="746.0"/>
+<line x1="4265.0" y1="714.0" x2="4265.0" y2="746.0"/>
+<line class="bus" x1="4043.0" y1="746.0" x2="4265.0" y2="746.0"/>
+<line x1="4154.0" y1="746.0" x2="4154.0" y2="778.0"/>
+<circle class="joint" cx="4154.0" cy="746.0" r="3.2"/>
+<line x1="3710.0" y1="890.0" x2="3710.0" y2="922.0"/>
+<line x1="4154.0" y1="890.0" x2="4154.0" y2="922.0"/>
+<line class="bus" x1="3710.0" y1="922.0" x2="4154.0" y2="922.0"/>
+<line x1="3932.0" y1="922.0" x2="3932.0" y2="954.0"/>
+<circle class="joint" cx="3932.0" cy="922.0" r="3.2"/>
+<line x1="4487.0" y1="714.0" x2="4487.0" y2="746.0"/>
+<line x1="4709.0" y1="714.0" x2="4709.0" y2="746.0"/>
+<line class="bus" x1="4487.0" y1="746.0" x2="4709.0" y2="746.0"/>
+<line x1="4598.0" y1="746.0" x2="4598.0" y2="778.0"/>
+<circle class="joint" cx="4598.0" cy="746.0" r="3.2"/>
+<line x1="4931.0" y1="714.0" x2="4931.0" y2="746.0"/>
+<line x1="5153.0" y1="714.0" x2="5153.0" y2="746.0"/>
+<line class="bus" x1="4931.0" y1="746.0" x2="5153.0" y2="746.0"/>
+<line x1="5042.0" y1="746.0" x2="5042.0" y2="778.0"/>
+<circle class="joint" cx="5042.0" cy="746.0" r="3.2"/>
+<line x1="4598.0" y1="890.0" x2="4598.0" y2="922.0"/>
+<line x1="5042.0" y1="890.0" x2="5042.0" y2="922.0"/>
+<line class="bus" x1="4598.0" y1="922.0" x2="5042.0" y2="922.0"/>
+<line x1="4820.0" y1="922.0" x2="4820.0" y2="954.0"/>
+<circle class="joint" cx="4820.0" cy="922.0" r="3.2"/>
+<line x1="3932.0" y1="1066.0" x2="3932.0" y2="1098.0"/>
+<line x1="4820.0" y1="1066.0" x2="4820.0" y2="1098.0"/>
+<line class="bus" x1="3932.0" y1="1098.0" x2="4820.0" y2="1098.0"/>
+<line x1="4376.0" y1="1098.0" x2="4376.0" y2="1130.0"/>
+<circle class="joint" cx="4376.0" cy="1098.0" r="3.2"/>
+<line x1="2058.9" y1="1242.0" x2="2058.9" y2="1274.0"/>
+<line x1="4376.0" y1="1242.0" x2="4376.0" y2="1274.0"/>
+<line class="bus" x1="2058.9" y1="1274.0" x2="4376.0" y2="1274.0"/>
+<line x1="3217.4" y1="1274.0" x2="3217.4" y2="1306.0"/>
+<circle class="joint" cx="3217.4" cy="1274.0" r="3.2"/>
+</svg>
+    <div class="box female" style="left:175.0px;top:426.0px"><div class="name">Hatice</div></div>
+<div class="box male" style="left:397.0px;top:426.0px"><div class="name">Halil</div></div>
+<div class="box female" style="left:286.0px;top:602.0px"><div class="role">Anneannenin anneannesi</div><div class="name">Ayşe Mistir</div><div class="dates">1897 — 10.01.1946</div><div class="place">Uşak / Merkez / Işık Mah.</div></div>
+<div class="box female" style="left:619.0px;top:426.0px"><div class="name">Raziye</div></div>
+<div class="box male" style="left:841.0px;top:426.0px"><div class="name">Yusuf</div></div>
+<div class="box male" style="left:730.0px;top:602.0px"><div class="role">Anneannenin ana dedesi</div><div class="name">Mustafa Mistir</div><div class="dates">01.07.1859 — ?</div><div class="place">Uşak / Merkez / Işık Mah.</div></div>
+<div class="box female" style="left:508.0px;top:778.0px"><div class="role">Anneannenin annesi</div><div class="name">Alime Kaya</div><div class="dates">1925 — 30.05.2008</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box female" style="left:1063.0px;top:426.0px"><div class="name">Halime</div></div>
+<div class="box male" style="left:1285.0px;top:426.0px"><div class="name">Halil</div></div>
+<div class="box female" style="left:1174.0px;top:602.0px"><div class="role">Anneannenin babaannesi</div><div class="name">Zeynep Kaya</div><div class="dates">1897 — 22.01.1989</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box female" style="left:1507.0px;top:250.0px"><div class="name">Hanım</div></div>
+<div class="box male" style="left:1729.0px;top:250.0px"><div class="name">Murat</div></div>
+<div class="box female" style="left:1618.0px;top:426.0px"><div class="name">Emine Kaya</div><div class="dates">1877 — 09.03.1943</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box female" style="left:1951.0px;top:250.0px"><div class="name">Ayşe</div></div>
+<div class="box male" style="left:2173.0px;top:250.0px"><div class="name">Süleyman</div></div>
+<div class="box male" style="left:2062.0px;top:426.0px"><div class="name">İbrahim Kaya</div><div class="dates">1866 — 03.09.1953</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box male" style="left:1840.0px;top:602.0px"><div class="role">Anneannenin baba dedesi</div><div class="name">Süleyman Kaya</div><div class="dates">1895 — 20.10.1967</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box male" style="left:1507.0px;top:778.0px"><div class="role">Anneannenin babası</div><div class="name">İbrahim Kaya</div><div class="dates">1922 — 24.08.2008</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box female" style="left:1007.5px;top:954.0px"><div class="role">Anneanne</div><div class="name">Bedriye Kaya → Öztek</div><div class="dates">01.01.1944 — 14.05.2021</div><div class="place">Kütahya / Gediz / Gürlek Köyü</div></div>
+<div class="box female" style="left:2395.0px;top:426.0px"><div class="name">Sathiye</div></div>
+<div class="box male" style="left:2617.0px;top:426.0px"><div class="name">Hüsyin</div></div>
+<div class="box female" style="left:2506.0px;top:602.0px"><div class="role">Dedenin anneannesi</div><div class="name">Emine Daşkın → Öztek</div><div class="dates">1880 — 29.10.1956</div><div class="place">Uşak / Merkez / Kurtuluş Mah.</div></div>
+<div class="box male" style="left:2839.0px;top:602.0px"><div class="name">Mustafa Öztek</div></div>
+<div class="box female" style="left:2672.5px;top:778.0px"><div class="role">Dedenin annesi</div><div class="name">Atike Öztek</div><div class="dates">1913 — 11.11.1983</div><div class="place">Uşak / Merkez / Karaağaç Mah.</div></div>
+<div class="box female" style="left:3061.0px;top:602.0px"><div class="name">Fadime</div></div>
+<div class="box male" style="left:3283.0px;top:602.0px"><div class="name">Halil</div></div>
+<div class="box male" style="left:3172.0px;top:778.0px"><div class="role">Dedenin babası</div><div class="name">Ali Öztek</div><div class="dates">1913 — 04.08.2000</div><div class="place">Uşak / Merkez / Karaağaç Mah.</div></div>
+<div class="box male" style="left:2922.2px;top:954.0px"><div class="role">Dede</div><div class="name">Mustafa Öztek</div><div class="dates">01.05.1943 — 20.02.2022</div><div class="place">İzmir / Bornova / Ergene Mah.</div></div>
+<div class="box female" style="left:1964.9px;top:1130.0px"><div class="role">Anne</div><div class="name">Yadigâr Öztek → İyidilli</div><div class="dates">25.08.1967 — Sağ</div><div class="place">İzmir / Güzelbahçe / Atatürk Mah.</div></div>
+<div class="box female" style="left:3505.0px;top:602.0px"><div class="name">Hatice</div></div>
+<div class="box male" style="left:3727.0px;top:602.0px"><div class="name">Mustafa</div></div>
+<div class="box female" style="left:3616.0px;top:778.0px"><div class="role">Babaannenin annesi</div><div class="name">Sıdıka Sirgeli</div><div class="dates">1902 — 06.02.1987</div><div class="place">Uşak / Merkez / Işık Mah.</div></div>
+<div class="box female" style="left:3949.0px;top:602.0px"><div class="name">Rukiye</div></div>
+<div class="box male" style="left:4171.0px;top:602.0px"><div class="name">Osman</div></div>
+<div class="box male" style="left:4060.0px;top:778.0px"><div class="role">Babaannenin babası</div><div class="name">Ahmet Sirgeli</div><div class="dates">1881 — 10.10.1934</div><div class="place">Uşak / Merkez / Işık Mah.</div></div>
+<div class="box female" style="left:3838.0px;top:954.0px"><div class="role">Babaanne</div><div class="name">Kadriye Sirgeli</div><div class="dates">1930 — 14.11.2011</div><div class="place">Uşak / Merkez / Işık Mah.</div></div>
+<div class="box female" style="left:4393.0px;top:602.0px"><div class="name">Dudu Eyidilli</div></div>
+<div class="box male" style="left:4615.0px;top:602.0px"><div class="name">Mistan Eyidilli</div></div>
+<div class="box female" style="left:4504.0px;top:778.0px"><div class="role">Dedenin annesi</div><div class="name">Hamide Eyidilli</div><div class="dates">1912 — 18.01.1962</div><div class="place">Uşak / Banaz / Şaban Köyü</div></div>
+<div class="box female" style="left:4837.0px;top:602.0px"><div class="name">Meryem</div></div>
+<div class="box male" style="left:5059.0px;top:602.0px"><div class="name">Yusuf</div></div>
+<div class="box male" style="left:4948.0px;top:778.0px"><div class="role">Dedenin babası</div><div class="name">Halil Eyidilli</div><div class="dates">1892 — 15.01.1962</div><div class="place">Uşak / Banaz / Şaban Köyü</div></div>
+<div class="box male" style="left:4726.0px;top:954.0px"><div class="role">Dede</div><div class="name">Asım İyidilli</div><div class="dates">20.03.1941 — Sağ</div><div class="place">İzmir / Güzelbahçe / Atatürk Mah.</div></div>
+<div class="box male" style="left:4282.0px;top:1130.0px"><div class="role">Baba</div><div class="name">Zafer İyidilli</div><div class="dates">20.05.1965 — Sağ</div><div class="place">İzmir / Güzelbahçe / Atatürk Mah.</div></div>
+<div class="box ego" style="left:3123.4px;top:1306.0px"><div class="role">BEN</div><div class="name">Alp Utku İyidilli</div><div class="dates">23.04.1997 — Sağ · Bekâr</div><div class="place">İzmir / Güzelbahçe / Atatürk Mah.</div></div>
+    <div class="genlab" style="top:1336.0px"><span class="gn">0</span><span class="gk">kuşak</span><span class="me">(ben)</span></div>
+<div class="genlab" style="top:1160.0px"><span class="gn">1</span><span class="gk">kuşak</span></div>
+<div class="genlab" style="top:984.0px"><span class="gn">2</span><span class="gk">kuşak</span></div>
+<div class="genlab" style="top:808.0px"><span class="gn">3</span><span class="gk">kuşak</span></div>
+<div class="genlab" style="top:632.0px"><span class="gn">4</span><span class="gk">kuşak</span></div>
+<div class="genlab" style="top:456.0px"><span class="gn">5</span><span class="gk">kuşak</span></div>
+<div class="genlab" style="top:280.0px"><span class="gn">6</span><span class="gk">kuşak</span></div>
+    <div class="foot">Sol kenar: kuşak cetveli (0 = ben, yukarı çıktıkça önceki kuşaklar) · sol yarı anne tarafı, sağ yarı baba tarafı.</div>
+  </div>
+</body>
+</html>
